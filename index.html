@@ -2,30 +2,42 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Queue</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>Document</title>
+  <title>Queue</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-    <div class="app_wrapper">
-        <div class="main-block">
-            <h2>Задайте свой вопрос Пьеру Бутену</h2>
-
-            <textarea name="text" class="vw-form__text" rows="10" placeholder="Вопросы для обсуждения"></textarea>
-            <a id="submitButton" class="submit">Отправить</a>
-        </div>
-        <div class="thank-message">
-            <h3>Благодарим вас за ваши вопросы, следите за расписанием встреч</h3>
-        </div>
-        <div class="alarm-message">
-            <h3>Извините, запись закрыта. Если вы уже записались, то скоро тут будет расписание встреч.</h3>
-        </div>
+  <div class="app_wrapper">
+    <div class="main-block">
+      <img src="img/vw.png" alt="" class="logo">
+      <textarea name="text" class="vw-form__text" rows="10" placeholder="Вопросы для обсуждения"></textarea>
+      <a id="submitButton" class="submit">Отправить</a>
     </div>
+    <div class="thank-message">
+      <img src="img/vw.png" alt="" class="logo">
+      <h3>Благодарим вас за ваши вопросы, следите за расписанием встреч</h3>
+    </div>
+    <div class="alarm-message">
+      <img src="img/vw.png" alt="" class="logo">
+      <h3>Извините, запись закрыта. Если вы уже записались, то скоро тут будет расписание встреч.</h3>
+    </div>
+    <div id="floatingCirclesG">
+      <div class="f_circleG" id="frotateG_01"></div>
+      <div class="f_circleG" id="frotateG_02"></div>
+      <div class="f_circleG" id="frotateG_03"></div>
+      <div class="f_circleG" id="frotateG_04"></div>
+      <div class="f_circleG" id="frotateG_05"></div>
+      <div class="f_circleG" id="frotateG_06"></div>
+      <div class="f_circleG" id="frotateG_07"></div>
+      <div class="f_circleG" id="frotateG_08"></div>
+    </div>
+  </div>
 
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script src="js/common.js"></script>
+  <script src="js/common.js"></script>
 </body>
 
 </html>

@@ -1,110 +1,165 @@
-var session, userId, firstName, lastName, question, userProfileId;
-axios.post('https://api.appercode.com/v1/volkswagen/login', {
-        "username": "admin",
-        "password": "7anzyzr5pu"
-    })
-    .then(function (response) {
-        session = response.data.sessionId;
-        userId = response.data.userId;
-        console.log(response.data);
-        checkStatus()
-    })
-    .catch(function (error) {
-        console.log(error);
-    });
-
-function checkStatus() {
-    axios({
-            method: 'get',
-            url: "https://api.appercode.com/v1/volkswagen/objects/Queue?include=['userId']",
-            headers: {
-                'X-Appercode-Session-Token': session
-            }
-        })
-        .then(function (response) {
-            var ArrayLength, ArrayIds, Sended;
-            ArrayLength = response.data.length;
-            ArrayIds = response.data;  
-        
-            Array.prototype.forEach.call(ArrayIds, function (item, i) {
-               if (item.userId == userId) {
-                    document.querySelector(".thank-message").style.display = "block"
-                }
-            })
+var session, userId, firstName, lastName, question, project, baseUrl, refreshT, userProfileId;
 
 
-            if (ArrayLength <= 12) {
-                getUserProfileId()
-            } else {
-                document.querySelector(".alarm-message").style.display = "block"
-            }
-        })
-        .catch(function (error) {
-            console.log(error);
-        })
+startLoadingAnimation();
+
+function sessionFromNative(e) {
+  var userData = JSON.parse(e);
+  session = userData.sessionId;
+  userId = userData.userId;
+  project = userData.projectName;
+  baseUrl = userData.baseUrl;
+  refreshT = userData.refreshToken;
+  checkStatus(session, project, baseUrl);
 }
 
+function loginByToken() {
+  var xhr = new XMLHttpRequest();
+  var url = baseUrl + project + "/login/byToken";
+  xhr.open("POST", url, true);
+  xhr.setRequestHeader("Content-Type", "application/json");
+
+
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState != 4)
+      return;
+    if (xhr.status != 200) {
+      alert(xhr.status + ': ' + xhr.statusText);
+    } else {
+      var response = JSON.parse(xhr.responseText)
+      session = response.sessionId;
+      checkStatus(session, project, baseUrl)
+    }
+  };
+  xhr.send('"' + refreshT + '"');
+}
+
+function checkStatus(session, project, base) {
+
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', base + project + "/objects/Queue?include=['userId']");
+  xhr.setRequestHeader('X-Appercode-Session-Token', session);
+  xhr.send();
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState != 4)
+      return;
+    if (xhr.status == 401) {
+      loginByToken();
+    } else
+    if (xhr.status != 200) {
+      alert(xhr.status + ': ' + xhr.statusText);
+    } else {
+      var ArrayLength, ArrayIds, Sended;
+      var response = JSON.parse(xhr.responseText);
+      ArrayLength = response.length;
+      console.log(ArrayLength);
+      ArrayIds = response;
+      Array.prototype.forEach.call(ArrayIds, function (item, i) {
+        if (item.userId == userId) {
+          stopLoadingAnimation()
+          document.querySelector(".thank-message").style.display = "block"
+        }
+      })
+
+
+      if (ArrayLength < 12) {
+        getUserProfileId()
+      } else {
+        stopLoadingAnimation()
+        document.querySelector(".alarm-message").style.display = "block"
+      }
+    }
+  }
+};
+
+
+
+
 function getUserProfileId() {
-    axios({
-            method: 'get',
-            url: 'https://api.appercode.com/v1/volkswagen/users/' + userId + '/profiles',
-            headers: {
-                'X-Appercode-Session-Token': session
-            }
-        })
-        .then(function (response) {
-            userProfileId = response.data[0].itemId;
-            console.log(userProfileId);
-            getUserProfile();
-            document.querySelector(".main-block").style.display = "block"
-        })
-        .catch(function (error) {
-            console.log(error);
-        })
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', baseUrl + project + "/users/" + userId + "/profiles");
+  xhr.setRequestHeader('X-Appercode-Session-Token', session);
+  xhr.send();
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState != 4)
+      return;
+    if (xhr.status == 401) {
+      loginByToken();
+    } else
+    if (xhr.status != 200) {
+      alert(xhr.status + ': ' + xhr.statusText);
+    } else {
+      var response = JSON.parse(xhr.responseText);
+      userProfileId = response[0].itemId;
+      getUserProfile();
+      stopLoadingAnimation()
+      document.querySelector(".main-block").style.display = "block"
+    }
+  }
+
 }
 
 function getUserProfile() {
-    axios({
-            method: 'get',
-            url: "https://api.appercode.com/v1/volkswagen/objects/UserProfiles/" + userProfileId + "?include=['firstName','lastName']",
-            headers: {
-                'X-Appercode-Session-Token': session
-            }
-        })
-        .then(function (response) {
-            firstName = response.data.firstName;
-            lastName = response.data.lastName;
-        })
-        .catch(function (error) {
-            console.log(error);
-        })
+
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', baseUrl + project + "/objects/UserProfiles/" + userProfileId + "?include=['firstName','lastName']");
+  xhr.setRequestHeader('X-Appercode-Session-Token', session);
+  xhr.send();
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState != 4)
+      return;
+    if (xhr.status == 401) {
+      loginByToken();
+    } else
+    if (xhr.status != 200) {
+      alert(xhr.status + ': ' + xhr.statusText);
+    } else {
+      var response = JSON.parse(xhr.responseText);
+
+      firstName = response.firstName;
+      lastName = response.lastName;
+
+    }
+  }
 }
 
 var button = document.querySelector("#submitButton")
 
 function sendQuestion() {
-    var message = document.querySelector(".vw-form__text").value;
-    axios({
-            method: 'post',
-            url: 'https://api.appercode.com/v1/volkswagen/objects/Queue',
-            headers: {
-                'X-Appercode-Session-Token': session
-            },
-            data: {
-                "userId": userId,
-                "firstName": firstName,
-                "lastName": lastName,
-                "Questions": message
-            }
-        })
-        .then(function (response) {
-            console.log("ушло");
-            location.reload()
+  var message = document.querySelector(".vw-form__text").value;
 
-        })
-        .catch(function (error) {
-            console.log(error);
-        })
+
+  var body = '{"userId":"'+ userId+'","firstName":"'+ firstName +'","lastName":"'+ lastName+'","Questions":"'+ message+'"}';
+  console.log(body);
+  
+  var xhr = new XMLHttpRequest();
+  var url = baseUrl + project + "/objects/Queue";
+  console.log(url);
+  xhr.open("POST", url, true);
+  xhr.setRequestHeader("Content-Type", "application/json");
+  xhr.setRequestHeader('X-Appercode-Session-Token', session);
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState != 4)
+      return;
+    if (xhr.status != 200) {
+      alert(xhr.status + ': ' + xhr.statusText);
+    } else {
+      location.reload()
+    }
+  };
+  xhr.send(body);
+  
+}
+
+function startLoadingAnimation() {
+  var imgObj = document.getElementById('floatingCirclesG');
+  imgObj.style.display = "block";
+};
+
+
+function stopLoadingAnimation() {
+  var imgObj = document.getElementById('floatingCirclesG');
+  imgObj.style.display = "none";
 }
 
 
