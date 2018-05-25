@@ -1,4 +1,4 @@
-var session, userId, firstName, lastName, question, project, baseUrl, refreshT, userProfileId;
+var session, userId, firstName, lastName, company, question, project, baseUrl, refreshT, userProfileId;
 
 
 startLoadingAnimation();
@@ -52,7 +52,6 @@ function checkStatus(session, project, base) {
       var ArrayLength, ArrayIds, Sended;
       var response = JSON.parse(xhr.responseText);
       ArrayLength = response.length;
-      console.log(ArrayLength);
       ArrayIds = response;
       Array.prototype.forEach.call(ArrayIds, function (item, i) {
         if (item.userId == userId) {
@@ -62,7 +61,7 @@ function checkStatus(session, project, base) {
       })
 
 
-      if (ArrayLength < 12) {
+      if (ArrayLength < 1000) {
         getUserProfileId()
       } else {
         stopLoadingAnimation()
@@ -102,7 +101,7 @@ function getUserProfileId() {
 function getUserProfile() {
 
   var xhr = new XMLHttpRequest();
-  xhr.open('GET', baseUrl + project + "/objects/UserProfiles/" + userProfileId + "?include=['firstName','lastName']");
+  xhr.open('GET', baseUrl + project + "/objects/UserProfiles/" + userProfileId + "?include=['firstName','lastName','company']");
   xhr.setRequestHeader('X-Appercode-Session-Token', session);
   xhr.send();
   xhr.onreadystatechange = function () {
@@ -115,7 +114,7 @@ function getUserProfile() {
       alert(xhr.status + ': ' + xhr.statusText);
     } else {
       var response = JSON.parse(xhr.responseText);
-
+      company = response.company;
       firstName = response.firstName;
       lastName = response.lastName;
 
@@ -129,8 +128,12 @@ function sendQuestion() {
   var message = document.querySelector(".vw-form__text").value;
 
 
-  var body = '{"userId":"'+ userId+'","firstName":"'+ firstName +'","lastName":"'+ lastName+'","Questions":"'+ message+'"}';
-  console.log(body);
+  var body = '{"userId":"'+ userId+
+      '","firstName":"'+ firstName+
+      '","company":"'+ company+
+      '","lastName":"'+ lastName+
+      '","Questions":"'+ message+'"}';
+  
   
   var xhr = new XMLHttpRequest();
   var url = baseUrl + project + "/objects/Queue";
